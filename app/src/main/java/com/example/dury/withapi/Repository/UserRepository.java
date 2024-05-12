@@ -38,5 +38,35 @@ public class UserRepository {
         });
     }
 
-    // Các phương thức khác có thể bao gồm cập nhật thông tin người dùng, lấy danh sách người dùng, xóa người dùng, v.v.
+    public void loginUser(String username, String password, final Callback<String> callback) {
+        Call<String> call = userService.loginUser(username, password);
+        call.enqueue(new Callback<String>() {
+            @Override
+            public void onResponse(Call<String> call, Response<String> response) {
+                if (response.isSuccessful()) {
+                    // Đăng nhập thành công
+                    String message = response.body();
+                    if (message != null && message.equals("Login successful!")) {
+                        callback.onResponse(call, Response.success("Login successful"));
+                    } else {
+                        callback.onFailure(call, new Throwable("Username or password does not exist"));
+                    }
+                } else {
+                    // Xử lý lỗi, đăng nhập thất bại
+                    String errorMessage = "Failed to login: " + response.errorBody().toString();
+                    callback.onFailure(call, new Throwable(errorMessage));
+                }
+            }
+
+            @Override
+            public void onFailure(Call<String> call, Throwable t) {
+                String errorMessage = "Error during API request: " + t.getMessage();
+                callback.onFailure(call, new Throwable(errorMessage));
+            }
+        });
+    }
+
+
+
+
 }
